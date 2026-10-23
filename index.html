@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 물 마시기 기록</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Pretendard -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+        }
+        /* Custom smooth transition and scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-wave {
+            animation: wave 8s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 min-h-full flex flex-col text-slate-800">
+
+    <!-- Header -->
+    <header class="w-full bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-sky-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-sky-600 to-blue-700 bg-clip-text text-transparent">수분 섭취 기록장</h1>
+                    <p class="text-xs text-slate-500">건강한 하루를 위한 적정 수분 충전</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="switchTab('today')" id="tab-btn-today" class="px-4 py-2 text-sm font-medium rounded-xl transition-all bg-sky-600 text-white shadow-md shadow-sky-100">오늘의 물</button>
+                <button onclick="switchTab('history')" id="tab-btn-history" class="px-4 py-2 text-sm font-medium rounded-xl transition-all text-slate-600 hover:bg-slate-100">기록 보관함</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- TAB 1: Today Water Tracker -->
+        <section id="tab-today" class="flex flex-col space-y-6 w-full max-w-xl mx-auto py-2">
+            
+            <!-- Date & Goal Config Header -->
+            <div class="flex items-center justify-between bg-white/70 backdrop-blur-sm px-6 py-4 rounded-2xl border border-sky-100 shadow-sm">
+                <div>
+                    <span id="today-date-badge" class="text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1 rounded-full">오늘 날짜</span>
+                    <h2 id="today-date-text" class="text-lg font-bold text-slate-800 mt-1">--</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400">목표량</span>
+                    <div class="flex items-center space-x-1 mt-0.5">
+                        <span id="current-goal-display" class="font-bold text-sky-600 text-base">2000</span>
+                        <span class="text-xs text-slate-500">ml</span>
+                        <button onclick="openGoalModal()" class="ml-2 p-1 text-slate-400 hover:text-sky-600 transition-colors" title="목표 수정">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Progress Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-sky-100/60 border border-sky-100 flex flex-col items-center relative overflow-hidden">
+                <!-- Circular Water Level Indicator or Bottle Graphic -->
+                <div class="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-8 border-sky-50 flex items-center justify-center shadow-inner overflow-hidden bg-sky-50/30">
+                    <!-- Water Wave Fill Effect -->
+                    <div id="water-fill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-sky-500 to-blue-400 transition-all duration-700 ease-out opacity-90" style="height: 0%;">
+                        <div class="absolute -top-3 left-0 right-0 h-4 bg-white/30 rounded-full animate-wave"></div>
+                    </div>
+                    <!-- Center Stats Content -->
+                    <div class="relative z-10 text-center flex flex-col items-center">
+                        <span class="text-xs uppercase font-semibold tracking-wider text-slate-500 mb-1">섭취량</span>
+                        <div class="flex items-baseline space-x-1">
+                            <span id="total-drank" class="text-3xl sm:text-4xl font-extrabold text-slate-800">0</span>
+                            <span class="text-sm font-semibold text-slate-500">ml</span>
+                        </div>
+                        <div class="mt-2 inline-flex items-center px-3 py-1 bg-white/80 backdrop-blur-md rounded-full shadow-sm border border-sky-100">
+                            <span id="percentage-text" class="text-xs font-bold text-sky-600">0% 달성</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Add Buttons -->
+                <div class="w-full mt-8">
+                    <p class="text-xs font-semibold text-slate-500 mb-3 text-center">컵 용량을 선택하여 추가하세요</p>
+                    <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                        <button onclick="addWater(150)" class="py-3 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs sm:text-sm border border-sky-100 transition-all shadow-sm active:scale-95 flex flex-col items-center space-y-1">
+                            <span class="text-lg">🍵</span>
+                            <span>+150 ml</span>
+                        </button>
+                        <button onclick="addWater(250)" class="py-3 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs sm:text-sm border border-sky-100 transition-all shadow-sm active:scale-95 flex flex-col items-center space-y-1">
+                            <span class="text-lg">🥤</span>
+                            <span>+250 ml</span>
+                        </button>
+                        <button onclick="addWater(500)" class="py-3 px-2 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs sm:text-sm border border-sky-100 transition-all shadow-sm active:scale-95 flex flex-col items-center space-y-1">
+                            <span class="text-lg">🍼</span>
+                            <span>+500 ml</span>
+                        </button>
+                        <button onclick="openCustomAddModal()" class="py-3 px-2 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-blue-200 active:scale-95 flex flex-col items-center space-y-1">
+                            <span class="text-lg">➕</span>
+                            <span>직접 입력</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="mt-6 flex justify-center w-full">
+                    <button onclick="resetTodayWater()" class="text-xs text-slate-400 hover:text-rose-500 transition-colors flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>오늘 기록 초기화</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: History Archive -->
+        <section id="tab-history" class="hidden flex flex-col space-y-6 w-full">
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-sky-100 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm">최근 7일 수분 섭취 기록</h3>
+                    <p class="text-xs text-slate-500">꾸준한 물 마시기 습관을 확인해보세요</p>
+                </div>
+                <div class="text-xs text-sky-600 font-semibold bg-sky-50 px-3 py-1.5 rounded-xl">
+                    평균 달성률: <span id="avg-achievement">0%</span>
+                </div>
+            </div>
+
+            <!-- History List Container -->
+            <div id="history-list" class="space-y-3 pb-12">
+                <!-- Populated dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Add Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all scale-95 opacity-0" id="modal-content">
+            <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">물 용량 직접 입력</h3>
+            <p class="text-xs text-slate-500 mb-4">마신 물의 양을 밀리리터(ml)로 입력하세요.</p>
+            <input type="number" id="custom-ml-input" placeholder="예: 300" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 text-center text-lg font-bold mb-4">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="closeCustomAddModal()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-sm rounded-xl transition-all">취소</button>
+                <button onclick="handleCustomAddSubmit()" class="py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-sky-200">추가하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Setting Modal -->
+    <div id="goal-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center transform transition-all scale-95 opacity-0" id="goal-modal-content">
+            <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">일일 목표 설정</h3>
+            <p class="text-xs text-slate-500 mb-4">하루 권장 수분 섭취 목표량을 설정하세요.</p>
+            <input type="number" id="goal-input" placeholder="예: 2000" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 text-center text-lg font-bold mb-4">
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="closeGoalModal()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-sm rounded-xl transition-all">취소</button>
+                <button onclick="saveGoalSubmit()" class="py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-sky-200">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-slate-400 border-t border-sky-100">
+        &copy; 오늘의 수분 섭취. 건강한 하루를 응원합니다.
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let waterData = {}; // Key: YYYY-MM-DD, Value: { drank: ml, goal: ml }
+        let currentDailyGoal = 2000;
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            initTodayDate();
+            renderTodayUI();
+            renderHistory();
+        });
+
+        function getTodayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function initTodayDate() {
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+            document.getElementById('today-date-badge').innerText = days[today.getDay()];
+            document.getElementById('today-date-text').innerText = dateStr;
+        }
+
+        function loadFromStorage() {
+            const savedData = localStorage.getItem('water_tracker_data');
+            const savedGoal = localStorage.getItem('water_tracker_goal');
+            if (savedGoal) {
+                currentDailyGoal = parseInt(savedGoal);
+            }
+            if (savedData) {
+                try {
+                    waterData = JSON.parse(savedData);
+                } catch (e) {
+                    waterData = {};
+                }
+            }
+            
+            const todayKey = getTodayKey();
+            if (!waterData[todayKey]) {
+                waterData[todayKey] = { drank: 0, goal: currentDailyGoal };
+            } else {
+                currentDailyGoal = waterData[todayKey].goal || currentDailyGoal;
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('water_tracker_data', JSON.stringify(waterData));
+            localStorage.setItem('water_tracker_goal', currentDailyGoal.toString());
+        }
+
+        function addWater(amount) {
+            const todayKey = getTodayKey();
+            if (!waterData[todayKey]) {
+                waterData[todayKey] = { drank: 0, goal: currentDailyGoal };
+            }
+            waterData[todayKey].drank += amount;
+            saveToStorage();
+            renderTodayUI();
+            renderHistory();
+        }
+
+        function resetTodayWater() {
+            const todayKey = getTodayKey();
+            if (waterData[todayKey]) {
+                waterData[todayKey].drank = 0;
+                saveToStorage();
+                renderTodayUI();
+                renderHistory();
+            }
+        }
+
+        function renderTodayUI() {
+            const todayKey = getTodayKey();
+            const currentRecord = waterData[todayKey] || { drank: 0, goal: currentDailyGoal };
+            const drank = currentRecord.drank;
+            const goal = currentRecord.goal || currentDailyGoal;
+
+            document.getElementById('total-drank').innerText = drank.toLocaleString();
+            document.getElementById('current-goal-display').innerText = goal.toLocaleString();
+
+            let percentage = Math.round((drank / goal) * 100);
+            if (percentage > 100) percentage = 100;
+
+            document.getElementById('water-fill').style.height = `${percentage}%`;
+            document.getElementById('percentage-text').innerText = `${Math.round((drank / goal) * 100)}% 달성`;
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            const todaySection = document.getElementById('tab-today');
+            const historySection = document.getElementById('tab-history');
+            const todayBtn = document.getElementById('tab-btn-today');
+            const historyBtn = document.getElementById('tab-btn-history');
+
+            if (tabName === 'today') {
+                todaySection.classList.remove('hidden');
+                historySection.classList.add('hidden');
+                todayBtn.className = "px-4 py-2 text-sm font-medium rounded-xl transition-all bg-sky-600 text-white shadow-md shadow-sky-100";
+                historyBtn.className = "px-4 py-2 text-sm font-medium rounded-xl transition-all text-slate-600 hover:bg-slate-100";
+                renderTodayUI();
+            } else {
+                todaySection.classList.add('hidden');
+                historySection.classList.remove('hidden');
+                historyBtn.className = "px-4 py-2 text-sm font-medium rounded-xl transition-all bg-sky-600 text-white shadow-md shadow-sky-100";
+                todayBtn.className = "px-4 py-2 text-sm font-medium rounded-xl transition-all text-slate-600 hover:bg-slate-100";
+                renderHistory();
+            }
+        }
+
+        // Render History List (Last 7 Days)
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            let html = '';
+            let totalAchievementSum = 0;
+            let countDays = 0;
+
+            // Generate last 7 days keys
+            for (let i = 0; i < 7; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                const record = waterData[key] || { drank: 0, goal: currentDailyGoal };
+                const goal = record.goal || currentDailyGoal;
+                const drank = record.drank;
+                const pct = Math.min(Math.round((drank / goal) * 100), 100);
+
+                totalAchievementSum += pct;
+                countDays++;
+
+                const dateDisplay = i === 0 ? '오늘' : `${d.getMonth() + 1}월 ${d.getDate()}일`;
+
+                html += `
+                    <div class="bg-white p-4 rounded-2xl border border-sky-100 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl ${pct >= 100 ? 'bg-emerald-100 text-emerald-600' : 'bg-sky-50 text-sky-600'} flex items-center justify-center font-bold text-xs">
+                                ${pct >= 100 ? '🎉' : '💧'}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${dateDisplay}</h4>
+                                <p class="text-xs text-slate-400">목표: ${goal.toLocaleString()} ml</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-sm text-slate-800">${drank.toLocaleString()} ml</div>
+                            <div class="text-xs font-semibold ${pct >= 100 ? 'text-emerald-600' : 'text-sky-600'}">${pct}% 달성</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            const avg = Math.round(totalAchievementSum / countDays);
+            document.getElementById('avg-achievement').innerText = `${avg}%`;
+        }
+
+        // Custom Add Modal controls
+        function openCustomAddModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            document.getElementById('custom-ml-input').value = '';
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCustomAddModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 150);
+        }
+
+        function handleCustomAddSubmit() {
+            const val = parseInt(document.getElementById('custom-ml-input').value);
+            if (isNaN(val) || val <= 0) return;
+            addWater(val);
+            closeCustomAddModal();
+        }
+
+        // Goal Modal controls
+        function openGoalModal() {
+            const modal = document.getElementById('goal-modal');
+            const content = document.getElementById('goal-modal-content');
+            document.getElementById('goal-input').value = currentDailyGoal;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeGoalModal() {
+            const modal = document.getElementById('goal-modal');
+            const content = document.getElementById('goal-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 150);
+        }
+
+        function saveGoalSubmit() {
+            const newGoal = parseInt(document.getElementById('goal-input').value);
+            if (isNaN(newGoal) || newGoal <= 0) return;
+            currentDailyGoal = newGoal;
+            const todayKey = getTodayKey();
+            if (waterData[todayKey]) {
+                waterData[todayKey].goal = currentDailyGoal;
+            } else {
+                waterData[todayKey] = { drank: 0, goal: currentDailyGoal };
+            }
+            saveToStorage();
+            renderTodayUI();
+            renderHistory();
+            closeGoalModal();
+        }
+    </script>
+</body>
+</html>
